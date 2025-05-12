@@ -6,28 +6,45 @@
     <div id="rss-news"></div>
   </div>
   <script>
-    fetch('https://api.allorigins.win/raw?url=https://www.emro.who.int/index.php?option=com_mediarss&feed_id=2&format=raw')
-      .then(r=>r.text())
-      .then(xmlText=>{
-        const parser=new DOMParser(), xml=parser.parseFromString(xmlText,'application/xml'),
-              items=xml.querySelectorAll('item');
-        let out='<ul style="list-style:none;padding:0;margin:0;">';
-        items.forEach((it,i)=>{
-          if(i>=5) return;
-          const t=it.querySelector('title').textContent,
-                l=it.querySelector('link').textContent;
-          out+=`<li style="margin-bottom:8px;">
-                   <a href="${l}" target="_blank" style="text-decoration:none;color:#004f8b;font-size:14px;">
-                     ${t}
-                   </a>
-                 </li>`;
-        });
-        out+='</ul>';
-        document.getElementById('rss-news').innerHTML=out;
-      })
-      .catch(_=>{
-        document.getElementById('rss-news').innerHTML=
-          '<p style="color:red;font-size:13px;">Unable to load news.</p>';
+(function(){
+  const feedUrl = 'https://www.emro.who.int/index.php?option=com_mediarss&feed_id=2&format=raw';
+  const proxy   = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feedUrl);
+
+  console.log('Fetching via proxy:', proxy);
+  fetch(proxy)
+    .then(r => {
+      if (!r.ok) throw new Error('Network response was not ok');
+      return r.json();
+    })
+    .then(data => {
+      console.log('Raw feed length:', data.contents.length);
+      const parser = new DOMParser();
+      const xml    = parser.parseFromString(data.contents, 'application/xml');
+      const items  = xml.querySelectorAll('item');
+      let out = '<ul style="list-style:none;padding:0;margin:0;">';
+
+      items.forEach((it, i) => {
+        if (i >= 5) return;
+        const t = it.querySelector('title').textContent;
+        const l = it.querySelector('link').textContent;
+        out += `
+          <li style="margin-bottom:8px;">
+            <a href="${l}" target="_blank"
+               style="text-decoration:none;color:#004f8b;font-size:14px;">
+              ${t}
+            </a>
+          </li>`;
       });
-  </script>
+
+      out += '</ul>';
+      document.getElementById('rss-news').innerHTML = out;
+    })
+    .catch(err => {
+      console.error('RSS fetch/render error:', err);
+      document.getElementById('rss-news').innerHTML =
+        '<p style="color:red;font-size:13px;">Unable to load news.</p>';
+    });
+})();
+</script>
+
 </body></html>

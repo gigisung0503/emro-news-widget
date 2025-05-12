@@ -1,41 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>EMRO Events RSS</title>
-</head>
-<body style="font-family:Arial,sans-serif;margin:0;padding:10px;">
-  <p><span style="font-size:18px;"><strong>EMRO Events</strong></span></p>
-  <div style="margin-bottom:12px;">&nbsp;</div>
-  <div>&nbsp;</div>
-  <div id="rss-news"></div>
-
+<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>
+  <div style="font-family:Arial,sans-serif;">
+    <p><span style="font-size:18px;"><strong>EMRO Events</strong></span></p>
+    <div style="margin-bottom:12px;">&nbsp;</div>
+    <div>&nbsp;</div>
+    <div id="rss-news"></div>
+  </div>
   <script>
-  fetch('https://api.allorigins.win/raw?url=https://www.emro.who.int/index.php?option=com_mediarss&feed_id=2&format=raw')
-    .then(r => r.text())
-    .then(xmlText => {
-      const parser = new DOMParser(),
-            xml    = parser.parseFromString(xmlText, 'application/xml'),
-            items  = xml.querySelectorAll('item');
-      let out = '<ul style="list-style:none;padding:0;margin:0;">';
-      items.forEach((it,i) => {
-        if (i >= 5) return;
-        const title = it.querySelector('title').textContent;
-        const link  = it.querySelector('link').textContent;
-        out += `<li style="margin-bottom:8px;">
-                  <a href="${link}" target="_blank" 
-                     style="text-decoration:none;color:#004f8b;font-size:14px;">
-                    ${title}
-                  </a>
-                </li>`;
+    fetch('https://api.allorigins.win/raw?url=https://www.emro.who.int/index.php?option=com_mediarss&feed_id=2&format=raw')
+      .then(r=>r.text())
+      .then(xmlText=>{
+        const parser=new DOMParser(), xml=parser.parseFromString(xmlText,'application/xml'),
+              items=xml.querySelectorAll('item');
+        let out='<ul style="list-style:none;padding:0;margin:0;">';
+        items.forEach((it,i)=>{
+          if(i>=5) return;
+          const t=it.querySelector('title').textContent,
+                l=it.querySelector('link').textContent;
+          out+=`<li style="margin-bottom:8px;">
+                   <a href="${l}" target="_blank" style="text-decoration:none;color:#004f8b;font-size:14px;">
+                     ${t}
+                   </a>
+                 </li>`;
+        });
+        out+='</ul>';
+        document.getElementById('rss-news').innerHTML=out;
+      })
+      .catch(_=>{
+        document.getElementById('rss-news').innerHTML=
+          '<p style="color:red;font-size:13px;">Unable to load news.</p>';
       });
-      out += '</ul>';
-      document.getElementById('rss-news').innerHTML = out;
-    })
-    .catch(() => {
-      document.getElementById('rss-news').innerHTML =
-        '<p style="color:red;font-size:13px;">Unable to load news.</p>';
-    });
   </script>
-</body>
-</html>
+</body></html>
